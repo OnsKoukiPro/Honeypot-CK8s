@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tpot-service
+  namespace: honeypots
+spec:
+  selector:
+    app: tpot
+  type: LoadBalancer  # Exposes honeypot to the public
+  ports:
+  - name: ftp
+    port: 21
+    targetPort: 21
+    protocol: TCP
+  - name: ssh
+    port: 22
+    targetPort: 22
+    protocol: TCP
+  - name: telnet
+    port: 23
+    targetPort: 23
+    protocol: TCP
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 443
+    protocol: TCP
+  - name: mysql
+    port: 3306
+    targetPort: 3306
+    protocol: TCP
+  - name: rdp
+    port: 3389
+    targetPort: 3389
+    protocol: TCP
+  - name: vnc
+    port: 5900
+    targetPort: 5900
+    protocol: TCP

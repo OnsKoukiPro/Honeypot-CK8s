@@ -14,21 +14,28 @@ spec:
       labels:
         app: opensearch
     spec:
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ["sh", "-c", "chown -R 1000:1000 /usr/share/opensearch/logs"]
+        volumeMounts:
+        - name: logs
+          mountPath: /usr/share/opensearch/logs
       containers:
       - name: opensearch
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          privileged: false
+          allowPrivilegeEscalation: false
         image: opensearchproject/opensearch:2.11.0
-        resources:
-          requests:
-            memory: "2Gi"
-            cpu: "1"
-          limits:
-            memory: "4Gi"
-            cpu: "2"
         env:
         - name: discovery.type
           value: single-node
         - name: OPENSEARCH_JAVA_OPTS
-          value: "-Xms1g -Xmx1g"
+          value: "-Xms1g -Xmx1g -Dopensearch.cgroups.hierarchy.override=/ -Dopensearch.logger.level=ERROR"
         - name: plugins.security.disabled
           value: "true"
         ports:
@@ -39,13 +46,11 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /usr/share/opensearch/data
-        readinessProbe:
-          httpGet:
-            path: /_cluster/health
-            port: 9200
-            scheme: HTTP
-          initialDelaySeconds: 30
-          periodSeconds: 10
+        - name: logs
+          mountPath: /usr/share/opensearch/logs
+      volumes:
+      - name: logs
+        emptyDir: {}
   volumeClaimTemplates:
   - metadata:
       name: data

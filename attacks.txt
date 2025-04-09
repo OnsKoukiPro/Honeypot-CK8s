@@ -1,4 +1,0 @@
-# hydra to simulate SSH or FTP attacks
-hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://<T-Pot-External-IP>:22
-# nmap attack to scan openports
-nmap -p 21,22,23,80,443,3306,3389,5900 <T-Pot-External-IP>

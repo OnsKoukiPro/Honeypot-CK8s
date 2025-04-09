@@ -1,0 +1,12 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hydra-ssh
+spec:
+  template:
+    spec:
+      containers:
+      - name: hydra
+        image: vanhauser/thc-hydra:latest
+        args: ["hydra", "-L", "users.txt", "-P", "passwords.txt", "ssh://ssh-honeypot.default.svc.cluster.local"]
+      restartPolicy: Never

@@ -7,6 +7,24 @@ data:
   fluent.conf: |
     <source>
       @type tail
+      path /var/log/opensearch/*.log
+      pos_file /var/log/fluentd-opensearch.log.pos
+      tag opensearch
+      <parse>
+        @type multi_format
+        <pattern>
+          format json
+          time_key time
+          time_format %Y-%m-%dT%H:%M:%S.%NZ
+        </pattern>
+        <pattern>
+          format none
+        </pattern>
+      </parse>
+    </source>
+
+    <source>
+      @type tail
       path /var/log/containers/*.log
       pos_file /var/log/fluentd-containers.log.pos
       tag kubernetes.*
@@ -21,11 +39,13 @@ data:
       @type kubernetes_metadata
     </filter>
 
-    <match kubernetes.**>
+    <match **>
       @type opensearch
-      scheme http  # Changed from https
+      scheme http
       host opensearch.monitoring.svc.cluster.local
       port 9200
       logstash_format true
       logstash_prefix fluentd
+      include_tag_key true
+      tag_key @log_name
     </match>

@@ -29,12 +29,28 @@ spec:
           value: single-node
         - name: OPENSEARCH_JAVA_OPTS
           value: "-Xms1g -Xmx1g"
+        - name: plugins.security.disabled
+          value: "true"
         ports:
         - containerPort: 9200
+          name: http
         - containerPort: 9600
+          name: transport
         volumeMounts:
         - name: data
           mountPath: /usr/share/opensearch/data
-      volumes:
-      - name: data
-        emptyDir: {}
+        readinessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi

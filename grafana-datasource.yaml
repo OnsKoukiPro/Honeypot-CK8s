@@ -1,0 +1,18 @@
+apiVersion: 1
+datasources:
+- name: OpenSearch
+  type: grafana-opensearch-datasource
+  access: proxy
+  url: http://opensearch.monitoring.svc.cluster.local:9200
+  jsonData:
+    database: fluentd-*
+    version: 2.11.0
+    flavor: opensearch
+    timeField: '@timestamp'
+    interval: Daily
+    logLevelField: 'level'
+    logMessageField: 'message'
+    maxConcurrentShardRequests: 5
+  secureJsonData:
+    password: admin
+    user: admin

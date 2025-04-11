@@ -27,6 +27,7 @@ kind: Service
 metadata:
   name: ssh-honeypot
 spec:
+  type : NodePort
   selector:
     app: ssh-honeypot
   ports:

@@ -46,7 +46,7 @@ spec:
       - name: varlog
         hostPath:
           path: /var/log
-      - name: pods            # Added
+      - name: pods            
         hostPath:
           path: /var/log/pods
       - name: dockercontainers

@@ -7,6 +7,6 @@ spec:
     spec:
       containers:
       - name: hydra
-        image: vanhauser/thc-hydra:latest
+        image: vanhauser/hydra:latest
         args: ["hydra", "-L", "users.txt", "-P", "passwords.txt", "ssh://ssh-honeypot.default.svc.cluster.local"]
       restartPolicy: Never

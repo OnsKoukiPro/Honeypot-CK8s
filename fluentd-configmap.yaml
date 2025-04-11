@@ -7,45 +7,46 @@ data:
   fluent.conf: |
     <source>
       @type tail
-      path /var/log/opensearch/*.log
-      pos_file /var/log/fluentd-opensearch.log.pos
-      tag opensearch
-      <parse>
-        @type multi_format
-        <pattern>
-          format json
-          time_key time
-          time_format %Y-%m-%dT%H:%M:%S.%NZ
-        </pattern>
-        <pattern>
-          format none
-        </pattern>
-      </parse>
-    </source>
-
-    <source>
-      @type tail
       path /var/log/containers/*.log
       pos_file /var/log/fluentd-containers.log.pos
       tag kubernetes.*
       read_from_head true
+      # Add these critical parameters:
+      follow_inodes true  # Track symlinks (default is true, but explicit is safer)
+      refresh_interval 5  # Check for new files more frequently
       <parse>
         @type json
         time_format %Y-%m-%dT%H:%M:%S.%NZ
+        keep_time_key true
       </parse>
     </source>
 
     <filter kubernetes.**>
       @type kubernetes_metadata
+      # Reduce API server load:
+      skip_labels false
+      skip_container_metadata false
+      skip_master_url true  # Auto-detect API server
     </filter>
 
-    <match **>
+    <match kubernetes.**>
       @type opensearch
       scheme http
       host opensearch.monitoring.svc.cluster.local
       port 9200
       logstash_format true
       logstash_prefix fluentd
-      include_tag_key true
-      tag_key @log_name
+      time_key @timestamp
+      utc_index true
+      # Improve reliability:
+      request_timeout 30s
+      reload_connections false
+      <buffer>
+        flush_interval 5s
+        retry_forever true
+        # Handle network issues gracefully:
+        retry_type exponential_backoff
+        retry_wait 1s
+        retry_max_interval 60s
+      </buffer>
     </match>

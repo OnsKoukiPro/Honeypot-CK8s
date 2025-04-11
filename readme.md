@@ -22,44 +22,44 @@ git clone https://github.com/https://github.com/OnsKoukiPro/Honeypot-CK8s.git
 cd k8s-docker-desktop
 
 ### 2. Deploy Components
-# Create monitoring namespace
+**Create monitoring namespace**
 kubectl apply -f monitoring-ns.yaml
 
-# Deploy OpenSearch
+**Deploy OpenSearch**
 kubectl apply -f opensearch.yaml
 
-# Set up Fluentd
+**Set up Fluentd**
 kubectl apply -f fluentd-rbac.yaml
 kubectl apply -f fluentd-configmap.yaml
 kubectl apply -f fluentd-daemonset.yaml
 
-# Install Grafana
+**Install Grafana**
 kubectl apply -f grafana-datasource.yaml
 kubectl apply -f grafana.yaml
 
-# Deploy Honeypot
+**Deploy Honeypot**
 kubectl apply -f honeypot-deployment.yaml
 
-# Generate traffic (optional)
+**Generate traffic (optional)**
 kubectl apply -f hydra-job.yaml //not applicable
 
 ### 3. Verification
 
-# Check Pod Status
+**Check Pod Statuses**
 kubectl get pods -n monitoring -w
 
-# Access Services
-# OpenSearch
+**Access Services**
+**OpenSearch**
 kubectl port-forward svc/opensearch -n monitoring 9200:9200
 
-# Grafana
+**Grafana**
 kubectl port-forward svc/grafana -n monitoring 3000:3000
 //creds are admin admin
 
-# Check OpenSearch-Fluentd connection in
+**Check OpenSearch-Fluentd connection in**
 http://localhost:9200/_cat/indices?v
 
-# Activate Honeypot
+**Activate Honeypot**
 kubectl port-forward svc/ssh-honeypot 2222:22
 
 

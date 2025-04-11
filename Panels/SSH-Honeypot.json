@@ -1,0 +1,120 @@
+{
+    "datasource": {
+      "type": "grafana-opensearch-datasource",
+      "uid": "f729870f-dae2-48bf-8e61-f37568621a96"
+    },
+    "fieldConfig": {
+      "defaults": {
+        "custom": {
+          "drawStyle": "bars",
+          "lineInterpolation": "linear",
+          "barAlignment": 0,
+          "lineWidth": 2,
+          "fillOpacity": 10,
+          "gradientMode": "hue",
+          "spanNulls": false,
+          "insertNulls": false,
+          "showPoints": "auto",
+          "pointSize": 5,
+          "stacking": {
+            "mode": "none",
+            "group": "A"
+          },
+          "axisPlacement": "auto",
+          "axisLabel": "Requests",
+          "axisColorMode": "text",
+          "scaleDistribution": {
+            "type": "linear"
+          },
+          "axisCenteredZero": false,
+          "hideFrom": {
+            "tooltip": false,
+            "viz": false,
+            "legend": false
+          },
+          "thresholdsStyle": {
+            "mode": "line+area"
+          }
+        },
+        "color": {
+          "mode": "continuous-BlPu",
+          "fixedColor": "red"
+        },
+        "mappings": [],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "green",
+              "value": null
+            },
+            {
+              "color": "orange",
+              "value": 10
+            },
+            {
+              "color": "red",
+              "value": 20
+            }
+          ]
+        }
+      },
+      "overrides": []
+    },
+    "gridPos": {
+      "h": 8,
+      "w": 24,
+      "x": 0,
+      "y": 0
+    },
+    "options": {
+      "tooltip": {
+        "mode": "multi",
+        "sort": "desc"
+      },
+      "legend": {
+        "showLegend": true,
+        "displayMode": "table",
+        "placement": "bottom",
+        "calcs": [
+          "max",
+          "mean",
+          "last"
+        ]
+      }
+    },
+    "targets": [
+      {
+        "alias": "",
+        "bucketAggs": [
+          {
+            "field": "@timestamp",
+            "id": "2",
+            "settings": {
+              "interval": "auto"
+            },
+            "type": "date_histogram"
+          }
+        ],
+        "datasource": {
+          "type": "grafana-opensearch-datasource",
+          "uid": "f729870f-dae2-48bf-8e61-f37568621a96"
+        },
+        "format": "table",
+        "luceneQueryType": "Metric",
+        "metrics": [
+          {
+            "id": "1",
+            "type": "count"
+          }
+        ],
+        "query": "",
+        "queryType": "lucene",
+        "refId": "A",
+        "timeField": "@timestamp"
+      }
+    ],
+    "title": "SSH Honeypot Activity",
+    "type": "timeseries",
+    "id": 1
+  }

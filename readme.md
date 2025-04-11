@@ -41,7 +41,7 @@ kubectl apply -f grafana.yaml
 kubectl apply -f honeypot-deployment.yaml
 
 # Generate traffic (optional)
-kubectl apply -f hydra-job.yaml
+kubectl apply -f hydra-job.yaml //not applicable
 
 ### 3. Verification
 
@@ -56,11 +56,16 @@ kubectl port-forward svc/opensearch -n monitoring 9200:9200
 kubectl port-forward svc/grafana -n monitoring 3000:3000
 //creds are admin admin
 
-# Check OpenSearch-Fluentd connection in 
+# Check OpenSearch-Fluentd connection in
 http://localhost:9200/_cat/indices?v
 
+# Activate Honeypot
+kubectl port-forward svc/ssh-honeypot 2222:22
 
-### OpenSearch Pod Pending
+
+
+### Common Issues
+**OpenSearch Pod Pending**
 
 kubectl describe pod/opensearch-0 -n monitoring
 # Check for resource constraints in Docker Desktop settings

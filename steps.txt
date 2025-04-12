@@ -1,4 +1,0 @@
-kubectl exec -n monitoring deployment/grafana -- \
-  grafana-cli \
-  --pluginUrl https://github.com/grafana/opensearch-datasource/releases/download/v2.7.0/grafana-opensearch-datasource-2.7.0.linux_amd64.zip \
-  plugins install grafana-opensearch-datasource

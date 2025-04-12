@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cowrie-honeypot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cowrie-honeypot
+  template:
+    metadata:
+      labels:
+        app: cowrie-honeypot
+    spec:
+      containers:
+      - name: cowrie
+        image: cowrie/cowrie:latest
+        args: ["-p", "2222"]
+        ports:
+        - containerPort: 2222
+        - containerPort: 2223
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: cowrie-data
+          mountPath: /cowrie/cowrie-git/data
+      volumes:
+      - name: cowrie-data
+        emptyDir: {}

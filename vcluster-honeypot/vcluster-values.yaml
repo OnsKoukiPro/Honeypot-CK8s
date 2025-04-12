@@ -1,0 +1,4 @@
+distro: k8s
+image: loftsh/vcluster
+persistence:
+  enabled: false

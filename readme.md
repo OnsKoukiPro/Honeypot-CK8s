@@ -61,8 +61,28 @@ http://localhost:9200/_cat/indices?v
 
 **Activate Honeypot**
 kubectl port-forward svc/ssh-honeypot 2222:22
+**Check Pod Statuses**
 
+### 3. Vcluster Setup
+# Download vCluster CLI
+curl -s -L "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64" -o vcluster
 
+# Make it executable
+chmod +x vcluster
+
+# Move to a system path (requires sudo)
+sudo mv vcluster /usr/local/bin
+
+# Verify installation
+vcluster --version
+
+# Install vluster with Helm
+helm repo add loft https://charts.loft.sh
+helm repo update
+helm upgrade --install honeypot-cluster loft/vcluster \
+  --version 0.15.0 \
+  --namespace honeynet-vcluster \
+  -f vcluster-values.yaml
 
 ### Common Issues
 **OpenSearch Pod Pending**

@@ -84,6 +84,9 @@ helm upgrade --install honeypot-cluster loft/vcluster \
   --namespace honeynet-vcluster \
   -f vcluster-values.yaml
 
+# Create namespace honeynet-vcluster and create vcluster
+vcluster create honeypot-cluster --namespace honeynet-vcluster
+
 ### Common Issues
 **OpenSearch Pod Pending**
 

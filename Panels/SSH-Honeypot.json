@@ -1,7 +1,7 @@
 {
     "datasource": {
       "type": "grafana-opensearch-datasource",
-      "uid": "f729870f-dae2-48bf-8e61-f37568621a96"
+      "uid": "a09858b2-9f02-4c4b-a344-5ae994d83390"
     },
     "fieldConfig": {
       "defaults": {
@@ -98,7 +98,7 @@
         ],
         "datasource": {
           "type": "grafana-opensearch-datasource",
-          "uid": "f729870f-dae2-48bf-8e61-f37568621a96"
+          "uid": "a09858b2-9f02-4c4b-a344-5ae994d83390"
         },
         "format": "table",
         "luceneQueryType": "Metric",

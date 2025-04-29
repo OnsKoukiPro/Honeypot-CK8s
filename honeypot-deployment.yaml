@@ -17,14 +17,15 @@ spec:
       - name: ssh-honeypot
         image: docker.io/panubo/sshd:latest
         ports:
-        - containerPort: 21
+        - containerPort: 22
         env:
         - name: SSH_USERS
-          value: "user:1000:1000:supersecret:/bin/bash"
+          value: "user:1000:1000:/bin/sh:/bin/sh"
         - name: SSH_ENABLE_PASSWORD_AUTH
           value: "true"
         - name: SSH_ENABLE_PUBKEY_AUTH
           value: "false"
+
 ---
 apiVersion: v1
 kind: Service

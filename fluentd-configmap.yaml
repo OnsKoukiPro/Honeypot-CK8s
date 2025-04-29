@@ -12,9 +12,8 @@ data:
       pos_file /var/log/fluentd-containers.log.pos
       tag kubernetes.*
       read_from_head true
-      # Add these critical parameters:
-      follow_inodes true  # Track symlinks (default is true, but explicit is safer)
-      refresh_interval 5  # Check for new files more frequently
+      follow_inodes true
+      refresh_interval 5
       <parse>
         @type json
         time_format %Y-%m-%dT%H:%M:%S.%NZ
@@ -25,10 +24,30 @@ data:
 
     <filter kubernetes.**>
       @type kubernetes_metadata
-      # Reduce API server load:
       skip_labels false
       skip_container_metadata false
-      skip_master_url true  # Auto-detect API server
+      skip_master_url true
+    </filter>
+
+    # Filter to sanitize and truncate logs
+    <filter kubernetes.**>
+      @type record_transformer
+      enable_ruby true
+      <record>
+        # Clean up excessive backslashes in log messages
+        log ${record["log"].to_s.gsub(/[\\]{10,}/, "[STRIPPED BACKSLASHES]").slice(0, 1000)}
+      </record>
+    </filter>
+
+    # Main filter for handling OpenSearch rejections and ensuring proper formatting
+    <filter kubernetes.**>
+      @type record_transformer
+      enable_ruby true
+      <record>
+        timestamp ${record["@timestamp"].to_s}
+        level ${record["level"].to_s}
+        message ${record["log"].to_s}
+      </record>
     </filter>
 
     <match kubernetes.**>
@@ -40,15 +59,19 @@ data:
       logstash_prefix fluentd
       time_key @timestamp
       utc_index true
-      # Improve reliability:
       request_timeout 30s
       reload_connections false
       <buffer>
         flush_interval 5s
         retry_forever true
-        # Handle network issues gracefully:
         retry_type exponential_backoff
         retry_wait 1s
         retry_max_interval 60s
       </buffer>
+      <on_failure>
+        # If ingest fails, record an error message in the `pipeline_error` field
+        <record>
+          pipeline_error "Failed to send log to OpenSearch"
+        </record>
+      </on_failure>
     </match>

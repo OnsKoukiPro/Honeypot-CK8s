@@ -50,14 +50,14 @@ kubectl get pods -n monitoring -w
 
 **Access Services**
 **OpenSearch**
-kubectl port-forward svc/opensearch -n monitoring 9200:9200
+kubectl port-forward --address 0.0.0.0 svc/opensearch -n monitoring 9200:9200
 
 **Grafana**
-kubectl port-forward svc/grafana -n monitoring 3000:3000
+kubectl port-forward --address 0.0.0.0 svc/grafana -n monitoring 3000:3000
 //creds are admin admin
 
 **Check OpenSearch-Fluentd connection in**
-http://localhost:9200/_cat/indices?v
+http://houcine.webhop.me:9200/_cat/indices?v
 
 **Activate Honeypot**
 kubectl port-forward svc/ssh-honeypot 2222:22

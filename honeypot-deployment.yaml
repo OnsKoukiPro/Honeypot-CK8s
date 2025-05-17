@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ssh-honeypot
+  namespace: monitoring
 spec:
   replicas: 1
   selector:
@@ -20,7 +21,7 @@ spec:
         - containerPort: 22
         env:
         - name: SSH_USERS
-          value: "user:1000:1000:supersecret:/bin/bash"
+          value: "user:1000:1000:/bin/bash:supersecret"
         - name: SSH_ENABLE_PASSWORD_AUTH
           value: "true"
         - name: SSH_ENABLE_PUBKEY_AUTH

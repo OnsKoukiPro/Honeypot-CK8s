@@ -54,7 +54,7 @@ kubectl port-forward --address 0.0.0.0 svc/opensearch -n monitoring 9200:9200
 
 **OpenSearch-Dashboard**
 kubectl port-forward --address 0.0.0.0 svc/opensearch-dashboards -n monitoring 5601:5601
-http://houcine.webhop.me:5601/app/login?
+http://houcine.webhop.me:5601/
 
 **Grafana**
 kubectl port-forward --address 0.0.0.0 svc/grafana -n monitoring 3000:3000

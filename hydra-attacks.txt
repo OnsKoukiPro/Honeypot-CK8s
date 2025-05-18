@@ -1,1 +1,1 @@
-hydra -L /mnt/c/Users/<USERNAME>/k8s-docker-desktop/SecLists/Usernames/top-usernames-shortlist.txt -P /mnt/c/Users/<USERNAME>/k8s-docker-desktop/SecLists/Passwords/Common-Credentials/10-million-password-list-top-100.txt ssh://localhost:2222 -t 4
+hydra -L /home/mohamed/k8s/Honeypot-CK8s/wordlists/top-usernames-shortlist.txt -P /home/mohamed/k8s/Honeypot-CK8s/wordlists/10-million-password-list-top-100.txt ssh://localhost:2222 -t 4

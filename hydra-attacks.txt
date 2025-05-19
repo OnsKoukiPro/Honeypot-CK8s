@@ -1,1 +1,1 @@
-hydra -L /home/mohamed/k8s/Honeypot-CK8s/wordlists/top-usernames-shortlist.txt -P /home/mohamed/k8s/Honeypot-CK8s/wordlists/10-million-password-list-top-100.txt ssh://localhost:2222 -t 4
+hydra -L SecLists/top-usernames-shortlist.txt -P SecLists/best110.txt ssh://localhost:2222 -t 4

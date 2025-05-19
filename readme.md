@@ -27,6 +27,10 @@ kubectl apply -f monitoring-ns.yaml
 
 **Deploy OpenSearch**
 kubectl apply -f opensearch.yaml
+kubectl apply -f opensearch-service.yaml
+
+**Deploy OpenSearch Dashboards**
+kubectl apply -f opensearch-dashboards.yaml
 
 **Set up Fluentd**
 kubectl apply -f fluentd-rbac.yaml
@@ -34,11 +38,11 @@ kubectl apply -f fluentd-configmap.yaml
 kubectl apply -f fluentd-daemonset.yaml
 
 **Install Grafana**
-kubectl apply -f grafana-datasource.yaml
 kubectl apply -f grafana.yaml
 
 **Deploy Honeypot**
 kubectl apply -f honeypot-deployment.yaml
+kubectl apply -f honeypot-service.yaml
 
 **Generate traffic (optional)**
 kubectl apply -f hydra-job.yaml //not applicable
@@ -66,7 +70,8 @@ http://houcine.webhop.me:3000/
 http://houcine.webhop.me:9200/_cat/indices?v
 
 **Activate Honeypot**
-kubectl port-forward svc/ssh-honeypot 2222:22
+kubectl port-forward --address 0.0.0.0 svc/ssh-honeypot -n monitoring 2222:22
+
 **Check Pod Statuses**
 
 ### 3. Vcluster Setup

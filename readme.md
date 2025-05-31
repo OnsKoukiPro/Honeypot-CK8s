@@ -98,6 +98,13 @@ helm upgrade --install honeypot-cluster loft/vcluster \
 # Create namespace honeynet-vcluster and create vcluster
 vcluster create honeypot-cluster --namespace honeynet-vcluster
 
+# Deploy Honeypot in vCluster
+kubectl apply -f cowrie-deployment.yaml
+
+# to switch back from vcluster context
+kubectl config use-context kubernetes-admin@kubernetes
+
+
 ### Common Issues
 **OpenSearch Pod Pending**
 

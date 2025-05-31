@@ -69,8 +69,6 @@ http://houcine.webhop.me:3000/
 **Check OpenSearch-Fluentd connection in**
 http://houcine.webhop.me:9200/_cat/indices?v
 
-**Activate Honeypot**
-kubectl port-forward --address 0.0.0.0 svc/ssh-honeypot -n monitoring 2222:22
 
 **Check Pod Statuses**
 
@@ -87,22 +85,17 @@ sudo mv vcluster /usr/local/bin
 # Verify installation
 vcluster --version
 
-# Install vluster with Helm
-helm repo add loft https://charts.loft.sh
-helm repo update
-helm upgrade --install honeypot-cluster loft/vcluster \
-  --version 0.15.0 \
-  --namespace honeynet-vcluster \
-  -f vcluster-values.yaml
-
-# Create namespace honeynet-vcluster and create vcluster
+# Create namespace honeynet-vcluster and create vcluster using vcluster cli
 vcluster create honeypot-cluster --namespace honeynet-vcluster
 
 # Deploy Honeypot in vCluster
 kubectl apply -f cowrie-deployment.yaml
 
-# to switch back from vcluster context
+# to switch back from vcluster context to default
 kubectl config use-context kubernetes-admin@kubernetes
+
+# to switch from default to vcluster context
+kubectl config use-context vcluster_honeypot-cluster_honeynet-vcluster_kubernetes-admin@kubernetes
 
 
 ### Common Issues

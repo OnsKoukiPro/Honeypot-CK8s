@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: honeypot-multi-attack
+spec:
+  template:
+    spec:
+      containers:
+      - name: attacker
+        image: ahmedhoucine0/honeypot-attacker:latest
+        env:
+        - name: TARGET_IP
+          value: "192.168.1.33"
+        volumeMounts:
+        - name: passwords-volume
+          mountPath: /attacks/passwords.txt
+          subPath: passwords.txt
+      volumes:
+      - name: passwords-volume
+        configMap:
+          name: attack-passwords
+      restartPolicy: Never
+  backoffLimit: 2

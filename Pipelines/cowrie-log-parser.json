@@ -1,0 +1,16 @@
+{
+  "cowrie-log-parser": {
+    "description": "Parses Cowrie login attempt logs from HoneyPotSSHTransport",
+    "processors": [
+      {
+        "grok": {
+          "field": "log",
+          "patterns": [
+            """stdout F %{TIMESTAMP_ISO8601:timestamp} \[HoneyPotSSHTransport,%{NUMBER:session_num:int},%{IP:src_ip}\] login attempt \[b'%{DATA:username}'/b'%{DATA:password}'\] %{WORD:status}"""
+          ],
+          "ignore_failure": true
+        }
+      }
+    ]
+  }
+}

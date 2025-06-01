@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conpot
+  labels:
+    app: conpot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conpot
+  template:
+    metadata:
+      labels:
+        app: conpot
+    spec:
+      containers:
+      - name: conpot
+        image: honeynet/conpot:latest
+        ports:
+        - containerPort: 102  # S7comm (Siemens)
+        - containerPort: 502  # Modbus TCP
+        - containerPort: 161  # SNMP
+        - containerPort: 44818 # Ethernet/IP
+        - containerPort: 80   # HTTP management
+        securityContext:
+          privileged: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conpot
+spec:
+  selector:
+    app: conpot
+  ports:
+  - name: modbus
+    port: 502
+    targetPort: 502
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: snmp
+    port: 161
+    targetPort: 161
+  - name: s7comm
+    port: 102
+    targetPort: 102
+  - name: enip
+    port: 44818
+    targetPort: 44818
+  type: ClusterIP

@@ -1,0 +1,35 @@
+PUT _ingest/pipeline/nikto-http-scan-pipeline
+{
+  "description": "Pipeline to parse Nikto HTTP scan logs",
+  "processors": [
+    {
+      "grok": {
+        "field": "log",
+        "patterns": [
+          "\\+ (?<web_server>nginx/[\\d\\.]+) appears to be outdated.*",
+          "\\+ (?<scan_summary>\\d+ requests: .*reported on remote host)",
+          "\\+ End Time: +%{GREEDYDATA:end_time}"
+        ],
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "attack_type",
+        "value": "nikto_http_scan"
+      }
+    },
+    {
+      "set": {
+        "field": "scanner",
+        "value": "Nikto"
+      }
+    },
+    {
+      "rename": {
+        "field": "kubernetes.pod_name",
+        "target_field": "attacker_pod"
+      }
+    }
+  ]
+}

@@ -1,19 +1,12 @@
-# Kubernetes Honeypot Monitoring Stack
+# Kubernetes Honeynet Monitoring Stack
 
-A complete observability stack for monitoring SSH honeypot activity using Fluentd, OpenSearch, and Grafana.
+A complete observability stack for monitoring honeynet activity in virtual cluster (vCluster) using Fluentd, OpenSearch, and custom multi-vector attacker image.
 
 ## Components
-- **Fluentd**: Log collection from honeypot pods
-- **OpenSearch**: Log storage and indexing
-- **Grafana**: Metrics visualization
-- **SSH Honeypot**: Docker-based SSH server
-- **Hydra**: Traffic generation tool
-
-## Prerequisites
-- Docker Desktop with Kubernetes enabled
-- `kubectl` configured
-- 8GB+ RAM allocated to Docker
-- 4+ CPU cores allocated to Docker
+- **Fluentd**: Log collection from honeypot pods deployed in vCluster
+- **OpenSearch**: Log storage, indexing and visualisation
+- **vCluster**: Docker-based SSH server
+- **honepot attacker**: Custom Docker-based SSH multi-protocol attacker image
 
 ## Quick Start
 
@@ -37,16 +30,6 @@ kubectl apply -f fluentd-rbac.yaml
 kubectl apply -f fluentd-configmap.yaml
 kubectl apply -f fluentd-daemonset.yaml
 
-**Install Grafana**
-kubectl apply -f grafana.yaml
-
-**Deploy Honeypot**
-kubectl apply -f honeypot-deployment.yaml
-kubectl apply -f honeypot-service.yaml
-
-**Generate traffic (optional)**
-kubectl apply -f hydra-job.yaml //not applicable
-
 ### 3. Verification
 
 **Check Pod Statuses**
@@ -60,17 +43,9 @@ kubectl port-forward --address 0.0.0.0 svc/opensearch -n monitoring 9200:9200
 kubectl port-forward --address 0.0.0.0 svc/opensearch-dashboards -n monitoring 5601:5601
 http://houcine.webhop.me:5601/
 
-**Grafana**
-kubectl port-forward --address 0.0.0.0 svc/grafana -n monitoring 3000:3000
-access grafana
-http://houcine.webhop.me:3000/
-//creds are admin admin
-
 **Check OpenSearch-Fluentd connection in**
 http://houcine.webhop.me:9200/_cat/indices?v
 
-
-**Check Pod Statuses**
 
 ### 3. Vcluster Setup
 # Download vCluster CLI
@@ -88,8 +63,11 @@ vcluster --version
 # Create namespace honeynet-vcluster and create vcluster using vcluster cli
 vcluster create honeypot-cluster --namespace honeynet-vcluster
 
-# Deploy Honeypot in vCluster
+# Deploy Cowrie, Conpot, Dionaea Honeypot in vCluster
 kubectl apply -f cowrie-deployment.yaml
+kubectl apply -f conpot-deployment.yaml
+kubectl apply -f dionea-deployment.yaml
+
 
 # to switch back from vcluster context to default
 kubectl config use-context kubernetes-admin@kubernetes
@@ -97,6 +75,11 @@ kubectl config use-context kubernetes-admin@kubernetes
 # to switch from default to vcluster context
 kubectl config use-context vcluster_honeypot-cluster_honeynet-vcluster_kubernetes-admin@kubernetes
 
+### 4. Attack Generation
+# Build custom attacker image
+docker build -t honeypot-attacker:latest .
+# Create configmap for password file
+ kubectl create configmap attack-passwords --from-file=passwords.txt
 
 ### Common Issues
 **OpenSearch Pod Pending**

@@ -57,6 +57,7 @@ data:
       suppress_type_name true
       verify_es_version_at_startup false
       pipeline "cowrie-log-parser"
+       pipeline "nikto-http-scan-pipeline"
       <buffer>
         flush_interval 10s
         retry_forever true

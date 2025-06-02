@@ -40,22 +40,20 @@ kind: Service
 metadata:
   name: dionaea
 spec:
+  type: NodePort
   selector:
     app: dionaea
   ports:
-  - name: ftp
-    port: 21
-    targetPort: 21
-  - name: http
-    port: 80
-    targetPort: 80
-  - name: smb
-    port: 445
-    targetPort: 445
-  - name: mysql
-    port: 3306
-    targetPort: 3306
-  - name: mssql
-    port: 1433
-    targetPort: 1433
-  type: ClusterIP
+    - name: ftp
+      port: 21
+      targetPort: 21
+      nodePort: 32121
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 32080
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+      nodePort: 32306
+

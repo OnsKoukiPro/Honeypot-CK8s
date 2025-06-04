@@ -6,7 +6,7 @@ A complete observability stack for monitoring honeynet activity in virtual clust
 - **Fluentd**: Log collection from honeypot pods deployed in vCluster
 - **OpenSearch**: Log storage, indexing and visualisation
 - **vCluster**: Docker-based SSH server
-- **honepot attacker**: Custom Docker-based SSH multi-protocol attacker image
+- **honeypot attacker**: Custom Docker-based multi-protocol attacker image
 
 ## Quick Start
 

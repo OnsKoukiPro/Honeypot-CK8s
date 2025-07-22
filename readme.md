@@ -8,6 +8,9 @@ A complete observability stack for monitoring honeynet activity in virtual clust
 - **vCluster**: Docker-based SSH server
 - **honeypot attacker**: Custom Docker-based multi-protocol attacker image
 
+## Architecture
+![Architecture](./arch.png)
+
 ## Quick Start
 
 ### 1. Clone Repository
@@ -48,55 +51,56 @@ http://houcine.webhop.me:9200/_cat/indices?v
 
 
 ### 3. Vcluster Setup
-# Download vCluster CLI
+**Download vCluster CLI**
 curl -s -L "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64" -o vcluster
 
-# Make it executable
+**Make it executable**
 chmod +x vcluster
 
-# Move to a system path (requires sudo)
+**Move to a system path (requires sudo)**
 sudo mv vcluster /usr/local/bin
 
-# Verify installation
+**Verify installation**
 vcluster --version
 
-# Create namespace honeynet-vcluster and create vcluster using vcluster cli
+**Create namespace honeynet-vcluster and create vcluster using vcluster cli**
 vcluster create honeypot-cluster --namespace honeynet-vcluster
 
-# Deploy Cowrie, Conpot, Dionaea Honeypot in vCluster
+**Deploy Cowrie, Conpot, Dionaea Honeypot in vCluster**
 kubectl apply -f cowrie-deployment.yaml
 kubectl apply -f conpot-deployment.yaml
 kubectl apply -f dionea-deployment.yaml
 
 
-# to switch back from vcluster context to default
+**to switch back from vcluster context to default**
 kubectl config use-context kubernetes-admin@kubernetes
 
-# to switch from default to vcluster context
+**to switch from default to vcluster context**
 kubectl config use-context vcluster_honeypot-cluster_honeynet-vcluster_kubernetes-admin@kubernetes
 
 ### 4. Attack Generation
-# Build custom attacker image
+**Build custom attacker image**
 docker build -t honeypot-attacker:latest .
-# Create configmap for password file
+**Create configmap for password file**
  kubectl create configmap attack-passwords --from-file=passwords.txt
 
 ### Common Issues
 **OpenSearch Pod Pending**
 
 kubectl describe pod/opensearch-0 -n monitoring
-# Check for resource constraints in Docker Desktop settings
+**Check for resource constraints in Docker Desktop settings**
 
 **Fluentd Permission Errors**
 ```bash
 kubectl logs -n monitoring -l app=fluentd
 # Reapply fluentd-rbac.yaml if permissions mismatch
 
-**Grafana Plugin Errors**
+**Grafana Plugin Errors*
 ```bash
 kubectl exec -n monitoring deployment/grafana -- \
   cat /var/lib/grafana/plugins/grafana-opensearch-datasource/plugin.json
 # Verify version matches 2.7.0
+
 
 ### Cleanup
 ```bash

@@ -1,108 +1,94 @@
-# Kubernetes Honeynet Monitoring Stack
+# Kubernetes Honeynet with Centralised Observability
 
-A complete observability stack for monitoring honeynet activity in virtual cluster (vCluster) using Fluentd, OpenSearch, and custom multi-vector attacker image.
-
-## Components
-- **Fluentd**: Log collection from honeypot pods deployed in vCluster
-- **OpenSearch**: Log storage, indexing and visualisation
-- **vCluster**: Docker-based SSH server
-- **honeypot attacker**: Custom Docker-based multi-protocol attacker image
+A multi-protocol honeynet that runs inside an isolated **vCluster** on Kubernetes. A **Fluentd → OpenSearch** pipeline collects, parses and visualises every attacker interaction. A custom attacker image replays realistic multi-vector attacks (SSH/FTP/MySQL brute force, Modbus and SNMP probing, HTTP scanning) so the dashboards can be validated end to end.
 
 ## Architecture
-![Architecture](./arch.png)
 
-## Quick Start
+```mermaid
+flowchart LR
+  subgraph host[Host Kubernetes cluster]
+    subgraph vc[vCluster: honeynet-vcluster]
+      C[Cowrie<br/>SSH/Telnet]
+      D[Dionaea<br/>FTP · SMB · MySQL · HTTP]
+      P[Conpot<br/>Modbus · S7 · SNMP · EtherNet/IP]
+    end
+    subgraph mon[namespace: monitoring]
+      F[Fluentd DaemonSet<br/>tail /var/log/containers]
+      O[(OpenSearch<br/>ingest pipelines)]
+      OD[OpenSearch Dashboards]
+      G[Grafana]
+    end
+    A[Attacker Job<br/>hydra · nikto · mbpoll · snmpwalk]
+  end
+  A --> C & D & P
+  C & D & P -. container logs .-> F --> O --> OD
+  O --> G
+```
 
-### 1. Clone Repository
-git clone https://github.com/https://github.com/OnsKoukiPro/Honeypot-CK8s.git
-cd k8s-docker-desktop
+| Component | What it does | Manifests |
+|---|---|---|
+| vCluster | isolates the honeypots from the host cluster's control plane | `vcluster-honeypot/vcluster-values.yaml`, `namespace.yaml` |
+| Cowrie | SSH/Telnet honeypot (NodePort) | `vcluster-honeypot/cowrie-deployment.yaml` |
+| Dionaea | FTP, SMB, RPC, MySQL, HTTP honeypot | `vcluster-honeypot/dionea-deployment.yaml` |
+| Conpot | ICS/SCADA honeypot: Modbus, S7comm, SNMP, EtherNet/IP | `vcluster-honeypot/conpot-deployment.yaml` |
+| Fluentd | DaemonSet with Kubernetes metadata enrichment, ships to OpenSearch | `fluentd-*.yaml` |
+| OpenSearch + Dashboards | storage, search, dashboards | `opensearch*.yaml`, `Dashboards/`, `Panels/` |
+| Ingest pipelines | parse Cowrie login attempts and Nikto scans into fields | `Pipelines/` |
+| Grafana | alternative dashboards via the OpenSearch datasource | `grafana*.yaml` |
+| Attacker | Debian image with hydra, nikto, mbpoll, snmpwalk | `Attacks/`, `multi-attack-job.yaml`, `hydra-job.yaml` |
 
-### 2. Deploy Components
-**Create monitoring namespace**
+## Quick start
+
+Prerequisites: a Kubernetes cluster (Docker Desktop or kubeadm), `kubectl`, the [vCluster CLI](https://www.vcluster.com/docs/get-started), and Docker.
+
+```bash
+git clone https://github.com/OnsKoukiPro/Honeypot-CK8s.git
+cd Honeypot-CK8s
+
+# 1. monitoring stack
 kubectl apply -f monitoring-ns.yaml
-
-**Deploy OpenSearch**
-kubectl apply -f opensearch.yaml
-kubectl apply -f opensearch-service.yaml
-
-**Deploy OpenSearch Dashboards**
-kubectl apply -f opensearch-dashboards.yaml
-
-**Set up Fluentd**
-kubectl apply -f fluentd-rbac.yaml
-kubectl apply -f fluentd-configmap.yaml
-kubectl apply -f fluentd-daemonset.yaml
-
-### 3. Verification
-
-**Check Pod Statuses**
+kubectl apply -f opensearch.yaml -f opensearch-service.yaml -f opensearch-dashboards.yaml
+kubectl apply -f fluentd-rbac.yaml -f fluentd-configmap.yaml -f fluentd-daemonset.yaml
+kubectl apply -f grafana.yaml -f grafana-datasource.yaml        # optional
 kubectl get pods -n monitoring -w
 
-**Access Services**
-**OpenSearch**
-kubectl port-forward --address 0.0.0.0 svc/opensearch -n monitoring 9200:9200
+# 2. honeynet inside a vCluster
+vcluster create honeypot-cluster --namespace honeynet-vcluster -f vcluster-honeypot/vcluster-values.yaml
+kubectl apply -f vcluster-honeypot/cowrie-deployment.yaml \
+              -f vcluster-honeypot/conpot-deployment.yaml \
+              -f vcluster-honeypot/dionea-deployment.yaml
+vcluster disconnect                                             # back to the host context
 
-**OpenSearch-Dashboard**
-kubectl port-forward --address 0.0.0.0 svc/opensearch-dashboards -n monitoring 5601:5601
-http://houcine.webhop.me:5601/
+# 3. generate attacks
+docker build -t honeypot-attacker:latest Attacks/
+kubectl create configmap attack-passwords --from-file=Attacks/passwords.txt
+kubectl apply -f multi-attack-job.yaml                          # set TARGET_IP in the manifest
+```
 
-**Check OpenSearch-Fluentd connection in**
-http://houcine.webhop.me:9200/_cat/indices?v
+Then load the ingest pipelines from `Pipelines/` (OpenSearch Dev Tools) and import `Dashboards/Dashboard.json`.
 
-
-### 3. Vcluster Setup
-**Download vCluster CLI**
-curl -s -L "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64" -o vcluster
-
-**Make it executable**
-chmod +x vcluster
-
-**Move to a system path (requires sudo)**
-sudo mv vcluster /usr/local/bin
-
-**Verify installation**
-vcluster --version
-
-**Create namespace honeynet-vcluster and create vcluster using vcluster cli**
-vcluster create honeypot-cluster --namespace honeynet-vcluster
-
-**Deploy Cowrie, Conpot, Dionaea Honeypot in vCluster**
-kubectl apply -f cowrie-deployment.yaml
-kubectl apply -f conpot-deployment.yaml
-kubectl apply -f dionea-deployment.yaml
-
-
-**to switch back from vcluster context to default**
-kubectl config use-context kubernetes-admin@kubernetes
-
-**to switch from default to vcluster context**
-kubectl config use-context vcluster_honeypot-cluster_honeynet-vcluster_kubernetes-admin@kubernetes
-
-### 4. Attack Generation
-**Build custom attacker image**
-docker build -t honeypot-attacker:latest .
-**Create configmap for password file**
- kubectl create configmap attack-passwords --from-file=passwords.txt
-
-### Common Issues
-**OpenSearch Pod Pending**
-
-kubectl describe pod/opensearch-0 -n monitoring
-**Check for resource constraints in Docker Desktop settings**
-
-**Fluentd Permission Errors**
 ```bash
-kubectl logs -n monitoring -l app=fluentd
-# Reapply fluentd-rbac.yaml if permissions mismatch
+kubectl port-forward svc/opensearch-dashboards -n monitoring 5601:5601   # http://localhost:5601
+kubectl port-forward svc/opensearch -n monitoring 9200:9200              # curl localhost:9200/_cat/indices?v
+```
 
-**Grafana Plugin Errors*
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `opensearch-0` Pending | `kubectl describe pod/opensearch-0 -n monitoring`. Usually not enough memory: raise the Docker Desktop limits. |
+| No logs in OpenSearch | `kubectl logs -n monitoring -l app=fluentd`. Reapply `fluentd-rbac.yaml`. |
+| Grafana datasource error | check that the `grafana-opensearch-datasource` plugin version is 2.7.0 |
+
+## Cleanup
+
 ```bash
-kubectl exec -n monitoring deployment/grafana -- \
-  cat /var/lib/grafana/plugins/grafana-opensearch-datasource/plugin.json
-# Verify version matches 2.7.0
+vcluster delete honeypot-cluster --namespace honeynet-vcluster
+kubectl delete -f . && kubectl delete ns monitoring
+```
 
+## Authors
 
-### Cleanup
-```bash
-kubectl delete -f ./
-kubectl delete ns monitoring
+Ons Kouki · Ahmed Houcine
+
+> For research and education only. Run the attacker job only against infrastructure you own.
